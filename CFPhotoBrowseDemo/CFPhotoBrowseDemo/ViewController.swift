@@ -28,7 +28,7 @@ class ViewController: UIViewController {
         flowLayout.itemSize = CGSize(width: (view.bounds.width - 41) / 3, height: (view.bounds.width - 41) / 3)
         getMovieList()
     }
-
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.

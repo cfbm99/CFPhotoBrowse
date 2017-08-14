@@ -10,16 +10,29 @@ import UIKit
 
 class ChrysanthemumIndicatorView: UIView {
 
-    lazy var indicator: UIActivityIndicatorView = {
+    fileprivate lazy var indicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.whiteLarge)
         indicator.startAnimating()
         return indicator
     }()
     
-    convenience init(toView: UIView) {
+    public convenience init(toView: UIView) {
         self.init(frame: toView.bounds)
         self.addSubview(indicator)
         toView.addSubview(self)
+    }
+    
+    public static func hide(fromView: UIView) {
+        for view in fromView.subviews.reversed() {
+            if view.isKind(of: self) {
+                let hud = view as! ChrysanthemumIndicatorView
+                UIView.animate(withDuration: 0.3, animations: { 
+                    hud.alpha = 0
+                }, completion: { (finish) in
+                    hud.removeFromSuperview()
+                })
+            }
+        }
     }
     
     override func layoutSubviews() {

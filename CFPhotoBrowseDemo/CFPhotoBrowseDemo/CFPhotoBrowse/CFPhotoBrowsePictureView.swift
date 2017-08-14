@@ -35,7 +35,6 @@ class CFPhotoBrowsePictureView: UIView {
         return scroll
     }()
     
-    fileprivate var indicatorView: ChrysanthemumIndicatorView?
     fileprivate var idx: Int!
     fileprivate var photoItem: CFPhotoBrowseItem!
 
@@ -49,6 +48,7 @@ class CFPhotoBrowsePictureView: UIView {
             self.photoItem.HDImage = image
             resizeImgView(by: image)
         } else {
+            _ = ChrysanthemumIndicatorView(toView: self)
             resizeImgView(by: photoItem.thumbnails)
         }
         self.idx = idx
@@ -57,20 +57,18 @@ class CFPhotoBrowsePictureView: UIView {
     
     public func loadingImage() {
         if let _ = photoItem.HDImage { return }
-        if let _ = indicatorView { return }
+        if SDWebImageManager.shared().isRunning() { return }
         if let image = imageFromCache(by: photoItem.imgUrl) {
             photoItem.HDImage = image
             resizeImgView(by: image)
         } else {
-            indicatorView = ChrysanthemumIndicatorView(toView: imageV)
             guard let url = URL.init(string: photoItem.imgUrl) else { return }
             SDWebImageManager.shared().downloadImage(with: url, options: [.retryFailed, .refreshCached], progress: nil) { (image, error, type, finish, url) in
                 if let img = image {
                     self.photoItem.HDImage = img
                     self.resizeImgView(by: img)
                 }
-                self.indicatorView?.removeFromSuperview()
-                self.indicatorView = nil
+                ChrysanthemumIndicatorView.hide(fromView: self)
             }
         }
     }
@@ -82,6 +80,9 @@ class CFPhotoBrowsePictureView: UIView {
         var originY = (self.frame.height - height) / 2
         if originY < 0 {
             originY = 0
+        }
+        if scale > 2 {
+            backScollView.maximumZoomScale = scale
         }
         imageV.frame = CGRect(x: 0, y: originY, width: self.frame.width, height: height)
         imageV.image = image
