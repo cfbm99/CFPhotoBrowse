@@ -30,7 +30,7 @@ class CFPhotoBrowsePictureView: UIView {
         scroll.showsVerticalScrollIndicator = false
         scroll.showsHorizontalScrollIndicator = false
         scroll.minimumZoomScale = 1
-        scroll.maximumZoomScale = 2
+        scroll.maximumZoomScale = 3
         scroll.delegate = self
         return scroll
     }()
@@ -100,7 +100,6 @@ extension CFPhotoBrowsePictureView: UIScrollViewDelegate {
         let ptY = scrollView.contentSize.height > scrollView.frame.height ? scrollView.contentSize.height / 2 : ((scrollView.frame.height - scrollView.contentSize.height) / 2 + scrollView.contentSize.height / 2)
         imageV.center = CGPoint(x: ptX, y: ptY)
     }
-    
 }
 
 extension CFPhotoBrowsePictureView {
@@ -125,8 +124,14 @@ extension CFPhotoBrowsePictureView {
     func doubleAction(tap: UITapGestureRecognizer) {
         if tap.state == .ended {
             if backScollView.zoomScale <= 1 {
+                var scale: CGFloat = 2
+                if imageV.frame.width / imageV.frame.height > 2 {
+                    scale = imageV.frame.width / imageV.frame.height
+                }
                 let touchPt = tap.location(in: tap.view)
-                backScollView.zoom(to: CGRect(x: touchPt.x, y: touchPt.y, width: 1, height: 1), animated: true)
+                let width = backScollView.bounds.width / scale
+                let height = backScollView.bounds.height / scale
+                backScollView.zoom(to: CGRect(x: touchPt.x - width / scale, y: touchPt.y - height / scale, width: width, height: height), animated: true)
             } else {
                 backScollView.setZoomScale(1, animated: true)
             }
