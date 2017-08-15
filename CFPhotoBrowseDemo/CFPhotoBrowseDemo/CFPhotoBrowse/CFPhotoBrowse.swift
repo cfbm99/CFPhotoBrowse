@@ -9,9 +9,9 @@
 import UIKit
 import Photos
 
-@objc protocol CFPhotoBrowseDelegate : NSObjectProtocol {
-   @objc optional func panGestureForVcDismissBegin(idx: Int, isDismiss: Bool)
-   @objc optional func panGestureForVcDisminssEnd(idx: Int, isDismiss: Bool)
+protocol CFPhotoBrowseDelegate : NSObjectProtocol {
+    func panGestureForVcDismissBegin(idx: Int, isDismiss: Bool)
+    func panGestureForVcDisminssEnd(idx: Int, isDismiss: Bool)
 }
 
 class CFPhotoBrowse: UIViewController {
