@@ -10,17 +10,26 @@ import UIKit
 import Photos
 
 protocol CFPhotoBrowseDelegate : NSObjectProtocol {
-    func panGestureForVcDismissBegin(idx: Int, isDismiss: Bool)
-    func panGestureForVcDisminssEnd(idx: Int, isDismiss: Bool)
+    func panGestureForVcDismissBegin(idx: Int)
+    func panGestureForVcDisminssEnd(idx: Int)
 }
 
 class CFPhotoBrowse: UIViewController {
     
-    let padding: CGFloat = 20
+    //private vars
+    fileprivate let padding: CGFloat = 20
+    fileprivate var cfPhotoBrowsePictureViews: [CFPhotoBrowsePictureView] = []
+    fileprivate var currentImgVLastSupperV: UIView?
+    fileprivate var cfPhotoItems: [CFPhotoBrowseItem] = []
     
+    //public vars
+    public weak var delegate: CFPhotoBrowseDelegate?
+    public var currentImageV: UIImageView!
+    public var currentIdx: Int = 0
+    
+    //private lazy vars
     fileprivate lazy var scollView: UIScrollView = {
-        let scroll = UIScrollView(frame: self.scrollViewFrame)
-        scroll.contentSize = CGSize(width: (scroll.bounds.width) * CGFloat(self.cfPhotoItems.count), height: scroll.bounds.height)
+        let scroll = UIScrollView()
         scroll.backgroundColor = UIColor.black
         scroll.alwaysBounceHorizontal = false
         scroll.alwaysBounceVertical = false
@@ -28,12 +37,6 @@ class CFPhotoBrowse: UIViewController {
         scroll.delegate = self
         return scroll
     }()
-    
-    fileprivate var scrollViewFrame: CGRect {
-        var frame = view.bounds
-        frame.size.width += padding
-        return frame
-    }
     
     fileprivate lazy var panGesture: UIPanGestureRecognizer = {
         let pan = UIPanGestureRecognizer(target: self, action: #selector(panAction))
@@ -46,18 +49,7 @@ class CFPhotoBrowse: UIViewController {
         return longGesture
     }()
     
-    public weak var delegate: CFPhotoBrowseDelegate?
-    
-    fileprivate var cfPhotoBrowsePictureViews: [CFPhotoBrowsePictureView] = []
-    
-    fileprivate var currentImgVLastSupperV: UIView?
-    
-    fileprivate var cfPhotoItems: [CFPhotoBrowseItem] = []
-    
-    public var currentImageV: UIImageView!
-    
-    public var currentIdx: Int = 0
-    
+    //public funcs
     convenience init(photoItems: [CFPhotoBrowseItem], selectedIdx: Int?) {
         self.init(nibName: nil, bundle: nil)
         cfPhotoItems = photoItems
@@ -66,18 +58,39 @@ class CFPhotoBrowse: UIViewController {
         }
     }
     
+    //life cycle
     override func viewDidLoad() {
         super.viewDidLoad()
         initializeInterface()
         // Do any additional setup after loading the view.
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        calculateFrames()
+    }
+    
+    //private funcs
     fileprivate func initializeInterface() {
         view.addSubview(scollView)
         view.addGestureRecognizer(panGesture)
         view.addGestureRecognizer(longGestue)
         addPhotoBrowsePhotoViews()
         registPhotoLibrary()
+    }
+    
+    fileprivate func calculateFrames() {
+        scollView.frame = CGRect(x: 0, y: 0, width: view.frame.width + padding, height: view.frame.height)
+        scollView.contentSize = CGSize(width: scollView.frame.width * CGFloat(cfPhotoItems.count), height: scollView.frame.height)
+        for (idx, itemView) in cfPhotoBrowsePictureViews.enumerated() {
+            var itemFrame = scollView.bounds
+            itemFrame.origin.x = CGFloat(idx) * scollView.frame.width
+            itemFrame.size.width = view.frame.width
+            itemView.frame = itemFrame
+        }
+        scollView.setContentOffset(CGPoint(x: CGFloat(currentIdx) * scollView.bounds.width, y: 0), animated: false)
+        cfPhotoBrowsePictureViews[currentIdx].layoutIfNeeded()
+        cfPhotoBrowsePictureViews[currentIdx].loadingImage()
     }
     
     override func didReceiveMemoryWarning() {
@@ -90,14 +103,11 @@ extension CFPhotoBrowse {
     
     fileprivate func addPhotoBrowsePhotoViews() {
         for (idx, item) in cfPhotoItems.enumerated() {
-            let photoView = CFPhotoBrowsePictureView(frame: CGRect(x: (scollView.frame.width) * CGFloat(idx), y: 0, width: view.frame.width, height: view.frame.height), photoItem: item, idx: idx, delegate: self)
+            let photoView = CFPhotoBrowsePictureView(photoItem: item, idx: idx, delegate: self)
             scollView.addSubview(photoView)
-            if idx == currentIdx {
-                photoView.loadingImage()
-            }
             cfPhotoBrowsePictureViews.append(photoView)
         }
-        scollView.setContentOffset(CGPoint(x: CGFloat(currentIdx) * scollView.frame.width, y: 0), animated: false)
+        currentImageV = cfPhotoBrowsePictureViews[currentIdx].imageV
     }
 }
 
@@ -145,14 +155,14 @@ extension CFPhotoBrowse {
             currentImgVLastSupperV = currentImageV.superview
             currentImageV.removeFromSuperview()
             view.window?.addSubview(currentImageV)
-            delegate?.panGestureForVcDismissBegin(idx: currentIdx, isDismiss: false)
+            delegate?.panGestureForVcDismissBegin(idx: currentIdx)
         } else if pan.state == .changed {
             currentImageV.transform = CGAffineTransform.init(translationX: translationPt.x, y: translationPt.y).scaledBy(x: 1 - percent, y: 1 - percent)
             view.alpha = 1 - percent
         } else if pan.state == .ended {
             if percent > 0.3 {
                 self.dismiss(animated: true, completion: {
-                    self.delegate?.panGestureForVcDismissBegin(idx: self.currentIdx, isDismiss: true)
+                    self.delegate?.panGestureForVcDisminssEnd(idx: self.currentIdx)
                 })
             } else {
                 guard let lastSupperV = currentImgVLastSupperV else { return }
@@ -162,7 +172,7 @@ extension CFPhotoBrowse {
                     self.currentImageV.transform = CGAffineTransform.identity
                     self.view.alpha = 1
                 })
-                delegate?.panGestureForVcDismissBegin(idx: currentIdx, isDismiss: false)
+                delegate?.panGestureForVcDisminssEnd(idx: currentIdx)
             }
         }
     }

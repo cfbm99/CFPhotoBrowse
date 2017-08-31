@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		181728ED1F555AA900DED020 /* CFPhotoBrowseTransitionAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 181728EC1F555AA900DED020 /* CFPhotoBrowseTransitionAnimation.swift */; };
 		CCA64182BD15EEBC7A087D4A /* Pods_CFPhotoBrowseDemoTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE9363008DAA765A6F255701 /* Pods_CFPhotoBrowseDemoTests.framework */; };
 		D6F4ADF823CE8B04DE38B569 /* Pods_CFPhotoBrowseDemo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C98221614C5DE7215EB544F /* Pods_CFPhotoBrowseDemo.framework */; };
 		DAB88C29CEB2D1109D26764C /* Pods_CFPhotoBrowseDemoUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 30B00709B78AE4AF0452A3B1 /* Pods_CFPhotoBrowseDemoUITests.framework */; };
@@ -42,6 +43,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		181728EC1F555AA900DED020 /* CFPhotoBrowseTransitionAnimation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CFPhotoBrowseTransitionAnimation.swift; sourceTree = "<group>"; };
 		30B00709B78AE4AF0452A3B1 /* Pods_CFPhotoBrowseDemoUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CFPhotoBrowseDemoUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8C98221614C5DE7215EB544F /* Pods_CFPhotoBrowseDemo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CFPhotoBrowseDemo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		99E687E84FFB691C50BB9B88 /* Pods-CFPhotoBrowseDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CFPhotoBrowseDemo.release.xcconfig"; path = "Pods/Target Support Files/Pods-CFPhotoBrowseDemo/Pods-CFPhotoBrowseDemo.release.xcconfig"; sourceTree = "<group>"; };
@@ -151,6 +153,7 @@
 				E88133F11F414FD9008DAE74 /* CFPhotoBrowse */,
 				E88133ED1F414FCA008DAE74 /* ViewController.swift */,
 				E88133EF1F414FD3008DAE74 /* CustomCollectionViewCell.swift */,
+				181728EC1F555AA900DED020 /* CFPhotoBrowseTransitionAnimation.swift */,
 				E88133BF1F414F73008DAE74 /* AppDelegate.swift */,
 				E88133C61F414F73008DAE74 /* Assets.xcassets */,
 				E88133FA1F415175008DAE74 /* Main.storyboard */,
@@ -488,6 +491,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E88133EE1F414FCA008DAE74 /* ViewController.swift in Sources */,
+				181728ED1F555AA900DED020 /* CFPhotoBrowseTransitionAnimation.swift in Sources */,
 				E88133F91F414FD9008DAE74 /* ChrysanthemumIndicatorView.swift in Sources */,
 				E88133F01F414FD3008DAE74 /* CustomCollectionViewCell.swift in Sources */,
 				E88133C01F414F73008DAE74 /* AppDelegate.swift in Sources */,

@@ -15,6 +15,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var flowLayout: UICollectionViewFlowLayout!
     fileprivate var imageUrls: [[String : String]] = []
     
+    //life cycle
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
@@ -22,17 +23,31 @@ class ViewController: UIViewController {
         initializeInterface()
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        flowLayout.itemSize = CGSize(width: (view.bounds.width - 41) / 3, height: (view.bounds.width - 41) / 3)
+    }
+    
+    // private funcs
     fileprivate func initializeInterface() {
         flowLayout.minimumLineSpacing = 10
         flowLayout.minimumInteritemSpacing = 10
-        flowLayout.sectionInset = UIEdgeInsetsMake(64, 10, 0, 10)
-        flowLayout.itemSize = CGSize(width: (view.bounds.width - 41) / 3, height: (view.bounds.width - 41) / 3)
+        flowLayout.sectionInset = UIEdgeInsetsMake(10, 10, 0, 10)
         getMovieList()
+        
     }
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    
+    @IBAction func clearCache(_ sender: UIBarButtonItem) {
+        print(SDImageCache.shared().getSize())
+        SDImageCache.shared().clearMemory()
+        SDImageCache.shared().clearDisk { 
+            print(SDImageCache.shared().getSize())
+        }
     }
 }
 
@@ -83,7 +98,33 @@ extension ViewController: UICollectionViewDataSource, UICollectionViewDelegate {
             items.append(item)
         }
         let browseVc = CFPhotoBrowse(photoItems: items, selectedIdx: indexPath.row)
+        browseVc.delegate = self
+        browseVc.transitioningDelegate = self
+        browseVc.modalPresentationStyle = .custom
         self.present(browseVc, animated: true, completion: nil)
     }
 }
 
+extension ViewController : CFPhotoBrowseDelegate {
+    
+    func panGestureForVcDismissBegin(idx: Int) {
+        guard let cell = collectionV.cellForItem(at: IndexPath(item: idx, section: 0)) as? CustomCollectionViewCell else { return }
+        cell.isHidden = true
+    }
+    
+    func panGestureForVcDisminssEnd(idx: Int) {
+        guard let cell = collectionV.cellForItem(at: IndexPath(item: idx, section: 0)) as? CustomCollectionViewCell else { return }
+        cell.isHidden = false
+    }
+}
+
+extension ViewController : UIViewControllerTransitioningDelegate {
+    
+    func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        return CFPhotoBrowseTransitionAnimation(transitionstyle: .present)
+    }
+    
+    func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        return CFPhotoBrowseTransitionAnimation(transitionstyle: .dismiss)
+    }
+}
