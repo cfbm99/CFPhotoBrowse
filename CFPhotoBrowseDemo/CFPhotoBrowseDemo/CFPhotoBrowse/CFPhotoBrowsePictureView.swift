@@ -8,6 +8,7 @@
 
 import UIKit
 import SDWebImage
+import Kingfisher
 
 protocol CFPhotoBrowsePictureViewDelegate: NSObjectProtocol {
     func dismissVc(by idx: Int, imageV: UIImageView)
@@ -18,6 +19,7 @@ class CFPhotoBrowsePictureView: UIView {
     //private vars
     fileprivate var idx: Int!
     fileprivate var photoItem: CFPhotoBrowseItem!
+    fileprivate var indicator: ChrysanthemumIndicatorView!
     
     fileprivate lazy var backScollView: UIScrollView = {
         let scroll: UIScrollView = UIScrollView()
@@ -41,45 +43,45 @@ class CFPhotoBrowsePictureView: UIView {
     }()
     
     //public funcs
-    convenience init(photoItem: CFPhotoBrowseItem, idx: Int, delegate: CFPhotoBrowsePictureViewDelegate?) {
-        self.init(frame: CGRect.zero)
-        self.addSubview(backScollView)
-        backScollView.addSubview(imageV)
-        addGestures()
+    convenience init(photoItem: CFPhotoBrowseItem, idx: Int, delegate: CFPhotoBrowsePictureViewDelegate?)
+    {
+        self.init(frame: CGRect(origin: CGPoint.zero, size: UIScreen.main.bounds.size))
         self.photoItem = photoItem
-        self.idx = idx
-        if let image = imageFromCache(by: photoItem.imgUrl) {
-            self.photoItem.HDImage = image
-            imageV.image = image
-        } else {
-            imageV.image = photoItem.thumbnails
-        }
         self.delegate = delegate
+        self.idx = idx
+        initSubviews()
     }
     
-    public func loadingImage() {
+    public func updateImage() {
         if let _ = photoItem.HDImage { return }
-        if SDWebImageManager.shared().isRunning() { return }
-        if let image = imageFromCache(by: photoItem.imgUrl) {
-            photoItem.HDImage = image
-            resizeImgView()
-        } else {
-            guard let url = URL.init(string: photoItem.imgUrl) else { return }
-            SDWebImageManager.shared().downloadImage(with: url, options: [.retryFailed, .refreshCached], progress: nil) { (image, error, type, finish, url) in
-                if let img = image {
-                    self.photoItem.HDImage = img
-                    self.imageV.image = img
-                    self.resizeImgView()
-                }
-                ChrysanthemumIndicatorView.hide(fromView: self)
+        
+        self.indicator.start()
+        guard let url = URL.init(string: photoItem.imgUrl) else { return }
+        let resource = ImageResource(downloadURL: url)
+        KingfisherManager.shared.retrieveImage(with: resource, options: nil, progressBlock: nil) { (image, error, cacheType, url) in
+            self.indicator.stop()
+            if let img = image {
+                self.photoItem.HDImage = img
+                self.imageV.image = img
+                self.resizeImgView()
             }
         }
     }
     
     //private funcs
-    override func layoutSubviews() {
-        super.layoutSubviews()
+    fileprivate func initSubviews() {
         backScollView.frame = self.bounds
+        self.addSubview(backScollView)
+        backScollView.addSubview(imageV)
+        indicator = ChrysanthemumIndicatorView(toView: self)
+        addGestures()
+        
+        if let image = photoCache(with: photoItem.imgUrl) {
+            self.photoItem.HDImage = image
+            imageV.image = image
+        } else {
+            imageV.image = photoItem.thumbnails
+        }
         resizeImgView()
     }
     
@@ -116,12 +118,13 @@ extension CFPhotoBrowsePictureView {
     fileprivate func addGestures() {
         let singleGesture = UITapGestureRecognizer(target: self, action: #selector(singleAction))
         singleGesture.delaysTouchesBegan = true
+        
         let doubleGesture = UITapGestureRecognizer(target: self, action: #selector(doubleAction))
         doubleGesture.numberOfTapsRequired = 2
         singleGesture.require(toFail: doubleGesture)
  
-        backScollView.addGestureRecognizer(singleGesture)
-        backScollView.addGestureRecognizer(doubleGesture)
+        self.addGestureRecognizer(singleGesture)
+        self.addGestureRecognizer(doubleGesture)
     }
     
     func singleAction(tap: UITapGestureRecognizer) {
@@ -151,12 +154,12 @@ extension CFPhotoBrowsePictureView {
 
 extension CFPhotoBrowsePictureView {
     // image cache funcs
-    fileprivate func imageFromCache(by key: String) -> UIImage? {
-        let sdCache = SDImageCache.shared()
-        if let image = sdCache?.imageFromMemoryCache(forKey: key) {
+    fileprivate func photoCache(with key: String) -> UIImage? {
+        let kf = KingfisherManager.shared
+        if let image = kf.cache.retrieveImageInMemoryCache(forKey: key) {
             return image
         } else {
-            if let image = sdCache?.imageFromDiskCache(forKey: key) {
+            if let image = kf.cache.retrieveImageInDiskCache(forKey: key) {
                 return image
             } else {
                 return nil

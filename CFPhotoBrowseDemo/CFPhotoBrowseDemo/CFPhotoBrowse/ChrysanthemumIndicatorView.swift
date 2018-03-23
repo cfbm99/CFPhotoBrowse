@@ -9,35 +9,45 @@
 import UIKit
 
 class ChrysanthemumIndicatorView: UIView {
-
+    //private vars
     fileprivate lazy var indicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.whiteLarge)
-        indicator.startAnimating()
+        indicator.stopAnimating()
+        indicator.hidesWhenStopped = true
         return indicator
     }()
     
+    //public funcs
     public convenience init(toView: UIView) {
-        self.init(frame: toView.bounds)
-        self.addSubview(indicator)
+        self.init(frame: CGRect.zero)
+        self.bounds = CGRect(origin: CGPoint.zero, size: CGSize(width: 30, height: 30))
+        self.center = toView.center
+        indicator.frame = self.bounds
+        
         toView.addSubview(self)
+        self.addSubview(indicator)
     }
     
-    public static func hide(fromView: UIView) {
-        for view in fromView.subviews.reversed() {
-            if view.isKind(of: self) {
-                let hud = view as! ChrysanthemumIndicatorView
-                UIView.animate(withDuration: 0.3, animations: { 
-                    hud.alpha = 0
-                }, completion: { (finish) in
-                    hud.removeFromSuperview()
-                })
-            }
-        }
+    public func start() {
+        indicator.startAnimating()
     }
     
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        indicator.frame = CGRect(x: (self.frame.width - 30) / 2, y: (self.frame.height - 30) / 2, width: 30, height: 30)
+    public func stop() {
+        indicator.stopAnimating()
     }
+    
+//    public static func hide(fromView: UIView) {
+//        for view in fromView.subviews.reversed() {
+//            if view.isKind(of: self) {
+//                let hud = view as! ChrysanthemumIndicatorView
+//                UIView.animate(withDuration: 0.3, animations: {
+//                    hud.alpha = 0
+//                }, completion: { (finish) in
+//                    hud.removeFromSuperview()
+//                })
+//            }
+//        }
+//    }
+    
 
 }

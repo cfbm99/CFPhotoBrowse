@@ -78,7 +78,7 @@ extension ViewController {
 extension ViewController: UICollectionViewDataSource, UICollectionViewDelegate {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return imageUrls.count - 8
+        return imageUrls.count - 6
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -91,7 +91,7 @@ extension ViewController: UICollectionViewDataSource, UICollectionViewDelegate {
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         var items: [CFPhotoBrowseItem] = []
-        for idx in 0 ..< imageUrls.count - 8 {
+        for idx in 0 ..< imageUrls.count - 6 {
             let cell = collectionView.cellForItem(at: IndexPath(item: idx, section: 0)) as! CustomCollectionViewCell
             let imageUrl = imageUrls[idx]["large"]!
             let item = CFPhotoBrowseItem(imgUrl: imageUrl, thumbnails: cell.imageV.image)

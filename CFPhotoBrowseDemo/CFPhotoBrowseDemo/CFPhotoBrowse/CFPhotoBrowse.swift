@@ -18,6 +18,7 @@ class CFPhotoBrowse: UIViewController {
     
     //private vars
     fileprivate let padding: CGFloat = 20
+    fileprivate let screen_s = UIScreen.main.bounds.size
     fileprivate var cfPhotoBrowsePictureViews: [CFPhotoBrowsePictureView] = []
     fileprivate var currentImgVLastSupperV: UIView?
     fileprivate var cfPhotoItems: [CFPhotoBrowseItem] = []
@@ -61,36 +62,32 @@ class CFPhotoBrowse: UIViewController {
     //life cycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        initializeInterface()
         // Do any additional setup after loading the view.
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
+        initializeInterface()
         calculateFrames()
     }
     
     //private funcs
     fileprivate func initializeInterface() {
         view.addSubview(scollView)
+        addPhotoBrowsePhotoViews()
         view.addGestureRecognizer(panGesture)
         view.addGestureRecognizer(longGestue)
-        addPhotoBrowsePhotoViews()
         registPhotoLibrary()
     }
     
     fileprivate func calculateFrames() {
-        scollView.frame = CGRect(x: 0, y: 0, width: view.frame.width + padding, height: view.frame.height)
+        scollView.frame = CGRect(x: 0, y: 0, width: screen_s.width + padding, height: screen_s.height)
         scollView.contentSize = CGSize(width: scollView.frame.width * CGFloat(cfPhotoItems.count), height: scollView.frame.height)
+        scollView.setContentOffset(CGPoint(x: CGFloat(currentIdx) * scollView.bounds.width, y: 0), animated: false)
+        
         for (idx, itemView) in cfPhotoBrowsePictureViews.enumerated() {
-            var itemFrame = scollView.bounds
+            var itemFrame = itemView.bounds
             itemFrame.origin.x = CGFloat(idx) * scollView.frame.width
             itemFrame.size.width = view.frame.width
             itemView.frame = itemFrame
         }
-        scollView.setContentOffset(CGPoint(x: CGFloat(currentIdx) * scollView.bounds.width, y: 0), animated: false)
-        cfPhotoBrowsePictureViews[currentIdx].layoutIfNeeded()
-        cfPhotoBrowsePictureViews[currentIdx].loadingImage()
+        cfPhotoBrowsePictureViews[currentIdx].updateImage()
     }
     
     override func didReceiveMemoryWarning() {
@@ -116,7 +113,7 @@ extension CFPhotoBrowse: UIScrollViewDelegate {
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         currentIdx = Int(scrollView.contentOffset.x / ((scrollView.frame.width)))
         currentImageV = cfPhotoBrowsePictureViews[currentIdx].imageV
-        cfPhotoBrowsePictureViews[currentIdx].loadingImage()
+        cfPhotoBrowsePictureViews[currentIdx].updateImage()
     }
 }
 
